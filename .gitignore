@@ -1,0 +1,115 @@
+# ============================
+# Node.js / Backend
+# ============================
+
+backend/node_modules/
+backend/.env
+backend/.env.local
+backend/.env.development
+backend/.env.production
+backend/npm-debug.log
+backend/yarn-error.log
+backend/dist/
+backend/logs/
+backend/*.log
+
+# Ignore uploaded files (if any)
+backend/uploads/
+backend/storage/
+
+
+# ============================
+# React / Frontend
+# ============================
+
+frontend/node_modules/
+frontend/.env
+frontend/.env.local
+frontend/.env.development
+frontend/.env.production
+frontend/.cache/
+frontend/dist/
+frontend/build/
+frontend/npm-debug.log
+frontend/yarn-error.log
+
+
+# ============================
+# Python AI Engine
+# ============================
+
+ai-engine/__pycache__/
+ai-engine/*.pyc
+ai-engine/.env
+ai-engine/env/
+ai-engine/venv/
+ai-engine/.pytest_cache/
+ai-engine/.DS_Store
+ai-engine/instance/
+
+# Model files (if auto-generated)
+ai-engine/ml/*.pkl
+ai-engine/ml/*.joblib
+
+
+# ============================
+# OS / Editor Files
+# ============================
+
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*.idea/
+*.vscode/
+*.vs/
+.vscode/*
+.idea/
+*.iml
+
+
+# ============================
+# Logs
+# ============================
+
+*.log
+logs/
+npm-debug.log*
+
+
+# ============================
+# Environment & Secrets
+# ============================
+
+.env
+.env.local
+*.env
+*.key
+*.pem
+*.crt
+
+
+# ============================
+# Python Virtual Environments
+# ============================
+
+venv/
+env/
+
+
+# ============================
+# Build Artifacts
+# ============================
+
+/dist
+/build
+/.cache
+
+
+# ============================
+# Temporary Files
+# ============================
+
+tmp/
+temp/
+*.tmp
