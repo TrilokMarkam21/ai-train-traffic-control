@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simulation</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+
+<div class="sidebar">
+    <h2>🚆 RailControl</h2>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="trains.html">Trains</a>
+    <a href="sections.html">Sections</a>
+    <a href="tsr.html">TSR</a>
+    <a href="simulation.html" class="active">Simulation</a>
+</div>
+
+<div class="main">
+    <h1>Train Simulation</h1>
+
+    <div class="track"><div id="trainA" class="train red"></div></div>
+    <div class="track"><div id="trainB" class="train yellow"></div></div>
+    <div class="track"><div id="trainC" class="train green"></div></div>
+
+    <div class="sim-buttons">
+        <button onclick="startSimulation()">Start</button>
+        <button onclick="pauseSimulation()">Pause</button>
+        <button onclick="resetSimulation()">Reset</button>
+        <button onclick="injectTrain()">Inject Train</button>
+    </div>
+</div>
+
+</body>
+</html>

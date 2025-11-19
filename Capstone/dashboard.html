@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - RailControl</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="sidebar">
+    <h2>🚆 RailControl</h2>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="trains.html">Trains</a>
+    <a href="sections.html">Sections</a>
+    <a href="tsr.html">TSR</a>
+    <a href="simulation.html">Simulation</a>
+</div>
+
+<div class="main">
+    <h1>Dashboard</h1>
+
+    <div class="card-grid">
+        <div class="card" onclick="location.href='trains.html'">
+            <h3>🚆 Trains</h3>
+            <p>View Active Trains</p>
+        </div>
+
+        <div class="card" onclick="location.href='sections.html'">
+            <h3>🛤 Sections</h3>
+            <p>Manage Rail Sections</p>
+        </div>
+
+        <div class="card" onclick="location.href='tsr.html'">
+            <h3>⚠️ TSR</h3>
+            <p>Speed Restrictions</p>
+        </div>
+
+        <div class="card" onclick="location.href='simulation.html'">
+            <h3>🎥 Simulation</h3>
+            <p>View Train Movement</p>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

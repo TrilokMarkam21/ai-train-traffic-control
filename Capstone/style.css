@@ -1,0 +1,142 @@
+/* ===== GLOBAL ===== */
+:root{
+  --rail-red:#8b0000;
+  --rail-deep:#600000;
+  --accent:#ffcc00;
+  --bg:#f6f7fb;
+  --glass: rgba(255,255,255,0.65);
+  --muted:#69707a;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,Arial,sans-serif;background:var(--bg);color:#111}
+
+/* ===== LAYOUT ===== */
+.sidebar{
+  width:260px;
+  min-width:200px;
+  background:linear-gradient(180deg,var(--rail-red),var(--rail-deep));
+  height:100vh;
+  padding:28px 18px;
+  color:white;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  box-shadow:4px 0 20px rgba(0,0,0,0.12);
+  position:fixed;
+  left:0;top:0;bottom:0;
+  z-index:40;
+}
+.logo{
+  display:flex;align-items:center;gap:12px;font-weight:700;font-size:20px;margin-bottom:6px;
+}
+.logo .badge{background:var(--accent);color:#000;padding:6px 8px;border-radius:8px;font-weight:700}
+
+/* sidebar links */
+.sidebar a, .sidebar button {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  text-decoration:none;
+  color:inherit;
+  background:transparent;
+  border:none;
+  padding:12px 10px;
+  width:100%;
+  text-align:left;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:600;
+  transition:all .18s ease;
+}
+.sidebar a:hover, .sidebar button:hover{transform:translateX(6px);background:rgba(255,255,255,0.06)}
+.sidebar a.active{background:linear-gradient(90deg,rgba(255,255,255,0.12),rgba(255,255,255,0.04));box-shadow:inset 0 1px 0 rgba(255,255,255,0.03)}
+
+/* collapse space for mobile */
+.sidebar .foot {
+  margin-top:auto; font-size:13px; color:rgba(255,255,255,0.85)
+}
+
+/* main area */
+.main {
+  margin-left:260px;
+  padding:34px;
+  min-height:100vh;
+  transition:margin .18s ease,padding .18s ease;
+}
+
+/* ===== LOGIN (full-screen center) ===== */
+.center-page{display:flex;align-items:center;justify-content:center;min-height:100vh;background:
+  linear-gradient(180deg, rgba(139,0,0,0.06), rgba(216, 14, 14,0.02)), var(--bg);
+  padding:20px;
+}
+.login-box{
+  width:100%;
+  max-width:420px;
+  background:var(--glass);
+  border-radius:14px;
+  padding:28px;
+  box-shadow:0 8px 30px rgba(24,24,40,0.12);
+  border-left:6px solid var(--rail-red);
+}
+.login-box h1{margin:0;font-size:22px}
+.login-box h3{margin:8px 0 18px;color:var(--muted);font-weight:600}
+.login-box input{
+  width:100%;padding:12px;border-radius:10px;border:1px solid #e6e8ee;margin-bottom:14px;font-size:15px;
+}
+.login-box button{
+  width:100%;padding:12px;border-radius:10px;background:linear-gradient(90deg,var(--rail-red),var(--rail-deep));
+  color:#fff;border:none;font-weight:700;cursor:pointer;box-shadow:0 8px 20px rgba(139,0,0,0.18)
+}
+.login-small{
+  display:flex;gap:8px;justify-content:flex-end;margin-top:12px;font-size:13px;color:var(--muted)
+}
+
+/* ===== DASHBOARD CARDS ===== */
+.header-row{display:flex;align-items:center;gap:18px;justify-content:space-between;flex-wrap:wrap;margin-bottom:22px}
+.h-title{font-size:22px;font-weight:700}
+.card-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:18px;
+  margin-top:6px;
+}
+@media(max-width:1100px){ .card-grid{grid-template-columns:repeat(2,1fr)} }
+@media(max-width:600px){ .main{margin-left:0;padding:18px} .sidebar{position:relative;height:auto} .card-grid{grid-template-columns:1fr} }
+
+.card{
+  background:white;border-radius:14px;padding:18px;box-shadow:0 8px 28px rgba(19,24,40,0.06);
+  border-top:6px solid var(--rail-red);cursor:pointer;transition:transform .18s ease,box-shadow .18s ease;
+}
+.card:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(19,24,40,0.12)}
+.card h3{margin:0;font-size:16px;color:var(--muted)}
+.card p{margin:8px 0 0;font-size:28px;font-weight:800;color:var(--rail-red)}
+
+/* ===== GLASS BOX / LISTS ===== */
+.glass-box{
+  background:rgba(255,255,255,0.75);
+  border-radius:12px;padding:18px;box-shadow:0 8px 20px rgba(20,24,40,0.06);
+}
+.list{list-style:none;padding:0;margin:0}
+.list li{padding:12px;border-bottom:1px solid #eef0f5;font-weight:700}
+
+/* ===== SIMULATION STYLE ===== */
+.track{height:92px; background:linear-gradient(180deg,#f4f6fa,#e9edf6); border-radius:12px; position:relative; overflow:hidden; border-left:8px solid var(--rail-red); margin-bottom:14px}
+.train{position:absolute;left:10px;top:26px;width:72px;height:44px;border-radius:10px;box-shadow:0 8px 20px rgba(0,0,0,0.08); transition:transform .05s linear}
+.red{background:linear-gradient(180deg,#c40000,#9c0000)}
+.yellow{background:linear-gradient(180deg,#ffd24d,#ffcc00)}
+.green{background:linear-gradient(180deg,#00b158,#008a40)}
+.sim-buttons{margin-top:12px;display:flex;gap:12px}
+
+/* sim button look */
+.sim-buttons button{padding:10px 14px;border-radius:10px;border:none;background:var(--rail-red);color:white;font-weight:700;cursor:pointer;box-shadow:0 8px 18px rgba(139,0,0,0.12)}
+
+/* small utilities */
+.kv{font-size:13px;color:var(--muted)}
+.center{display:flex;align-items:center;justify-content:center}
+
+/* subtle footer if needed */
+.footer{margin-top:28px;color:var(--muted);font-size:13px}
+
+/* link active (when using sidebar on separate pages) */
+.sidebar a.active{background:linear-gradient(90deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02));box-shadow:inset 0 1px 0 rgba(255,255,255,0.02)}
