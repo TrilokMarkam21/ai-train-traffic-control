@@ -13,7 +13,10 @@ const aiRoutes = require("./routes/ai");
 const app = express();
 
 // ---------------- MIDDLEWARE -----------------
-app.use(cors());
+app.use(cors({
+  origin: true,
+  credentials: true
+}));
 app.use(morgan("dev"));
 app.use(express.json()); // Built-in JSON parser
 
