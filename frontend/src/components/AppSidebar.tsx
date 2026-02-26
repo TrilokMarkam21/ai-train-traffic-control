@@ -9,6 +9,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Navigation,
+  Calendar,
+  Gauge,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -17,6 +19,8 @@ const navItems = [
   { label: "Dashboard", icon: LayoutDashboard, to: "/dashboard" },
   { label: "Trains", icon: Train, to: "/trains" },
   { label: "Tracking", icon: Navigation, to: "/tracking" },
+  { label: "Schedules", icon: Calendar, to: "/schedules" },
+  { label: "Traffic Control", icon: Gauge, to: "/traffic-control" },
   { label: "AI Control", icon: Brain, to: "/ai-control" },
   { label: "Analytics", icon: BarChart3, to: "/analytics" },
 ];

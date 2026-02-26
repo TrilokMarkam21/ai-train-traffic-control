@@ -47,6 +47,13 @@ ai-engine/.pytest_cache/
 ai-engine/.DS_Store
 ai-engine/instance/
 
+# AI Service (FastAPI)
+ai-service/__pycache__/
+ai-service/*.pyc
+ai-service/.env
+ai-service/venv/
+ai-service/.pytest_cache/
+
 # Model files (if auto-generated)
 ai-engine/ml/*.pkl
 ai-engine/ml/*.joblib
