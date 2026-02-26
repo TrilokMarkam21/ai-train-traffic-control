@@ -12,6 +12,7 @@ const aiRoutes = require("./routes/ai");
 const analyticsRoutes = require("./routes/analytics");
 const scheduleRoutes = require("./routes/schedules");
 const trafficControlRoutes = require("./routes/trafficControl");
+const maintenanceRoutes = require("./routes/maintenance");
 
 const app = express();
 
@@ -38,6 +39,7 @@ app.use("/api/tsr", tsrRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/schedules", scheduleRoutes);
 app.use("/api/traffic", trafficControlRoutes);
+app.use("/api/maintenance", maintenanceRoutes);
 app.use("/api/analytics", analyticsRoutes);
 
 // Health check

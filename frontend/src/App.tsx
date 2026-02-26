@@ -15,6 +15,7 @@ import AnalyticsPage from "@/pages/AnalyticsPage";
 import TrackingPage from "@/pages/TrackingPage";
 import SchedulesPage from "@/pages/SchedulesPage";
 import TrafficControlPage from "@/pages/TrafficControlPage";
+import MaintenancePage from "@/pages/MaintenancePage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,6 +44,7 @@ const App = () => (
               <Route path="/ai-control" element={<AIControlPage />} />
               <Route path="/schedules" element={<SchedulesPage />} />
               <Route path="/traffic-control" element={<TrafficControlPage />} />
+              <Route path="/maintenance" element={<MaintenancePage />} />
               <Route path="/analytics" element={<AnalyticsPage />} />
             </Route>
             <Route path="*" element={<NotFound />} />

@@ -11,6 +11,7 @@ import {
   Navigation,
   Calendar,
   Gauge,
+  Wrench,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -21,6 +22,7 @@ const navItems = [
   { label: "Tracking", icon: Navigation, to: "/tracking" },
   { label: "Schedules", icon: Calendar, to: "/schedules" },
   { label: "Traffic Control", icon: Gauge, to: "/traffic-control" },
+  { label: "Maintenance", icon: Wrench, to: "/maintenance" },
   { label: "AI Control", icon: Brain, to: "/ai-control" },
   { label: "Analytics", icon: BarChart3, to: "/analytics" },
 ];
