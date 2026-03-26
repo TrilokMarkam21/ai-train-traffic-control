@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const trafficControlService = require("../services/trafficControlService");
 const smartTrafficService = require("../services/smartTrafficService");
+const conflictService = require("../services/conflictService");
 
 /**
  * Traffic Control API Routes
@@ -18,12 +19,34 @@ router.get("/occupancy", async (req, res) => {
   }
 });
 
-// Detect conflicts between trains
+// Advanced conflict detection with AI-powered resolution
+// Returns comprehensive conflict analysis with severity, resolution strategies, and recommendations
+router.get("/conflict-analysis", async (req, res) => {
+  try {
+    const result = await conflictService.detectAllConflicts();
+    res.json(result);
+  } catch (error) {
+    console.error("Advanced conflict detection error:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Detect conflicts between trains - supports basic and advanced modes
 router.get("/conflicts", async (req, res) => {
   try {
-    const conflicts = await trafficControlService.detectConflicts();
-    res.json(conflicts);
+    const mode = req.query.mode || 'basic';
+    
+    if (mode === 'advanced') {
+      // Advanced conflict detection with AI-powered resolution
+      const result = await conflictService.detectAllConflicts();
+      res.json(result);
+    } else {
+      // Basic conflict detection
+      const conflicts = await trafficControlService.detectConflicts();
+      res.json(conflicts);
+    }
   } catch (error) {
+    console.error("Conflict detection error:", error);
     res.status(500).json({ error: error.message });
   }
 });

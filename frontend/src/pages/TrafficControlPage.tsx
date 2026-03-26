@@ -3,7 +3,8 @@ import trafficControlApi from '../api/trafficControlApi';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
-import { AlertTriangle, Train, Activity, Clock, TrendingUp, Shield, RefreshCw } from 'lucide-react';
+import { AlertTriangle, Train, Activity, Clock, TrendingUp, Shield, RefreshCw, Brain } from 'lucide-react';
+import { Button } from '../components/ui/button';
 
 interface SectionOccupancy {
   sectionId: string;
@@ -63,6 +64,11 @@ const TrafficControlPage = () => {
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [summary, setSummary] = useState<any>({});
 
+  // Advanced conflict analysis state
+  const [showAdvancedConflicts, setShowAdvancedConflicts] = useState(false);
+  const [advancedConflicts, setAdvancedConflicts] = useState<any>(null);
+  const [loadingAdvanced, setLoadingAdvanced] = useState(false);
+
   useEffect(() => {
     loadDashboard();
     const interval = setInterval(loadDashboard, 30000); // Refresh every 30 seconds
@@ -83,6 +89,18 @@ const TrafficControlPage = () => {
       console.error('Error loading traffic dashboard:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadAdvancedConflicts = async () => {
+    try {
+      setLoadingAdvanced(true);
+      const data = await trafficControlApi.getAdvancedConflicts();
+      setAdvancedConflicts(data);
+    } catch (error) {
+      console.error('Error loading advanced conflicts:', error);
+    } finally {
+      setLoadingAdvanced(false);
     }
   };
 
@@ -116,6 +134,19 @@ const TrafficControlPage = () => {
           <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
           Refresh
         </button>
+        <Button
+          variant={showAdvancedConflicts ? "default" : "outline"}
+          onClick={() => {
+            if (!showAdvancedConflicts) {
+              loadAdvancedConflicts();
+            }
+            setShowAdvancedConflicts(!showAdvancedConflicts);
+          }}
+          className="flex items-center gap-2"
+        >
+          <Brain className="h-4 w-4" />
+          AI Conflict Analysis
+        </Button>
       </div>
 
       {/* Summary Cards */}
@@ -364,6 +395,75 @@ const TrafficControlPage = () => {
                 </div>
               ))}
             </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* AI Conflict Analysis Panel */}
+      {showAdvancedConflicts && (
+        <Card className="border-purple-500">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Brain className="h-5 w-5 text-purple-500" />
+              AI-Powered Conflict Analysis
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loadingAdvanced ? (
+              <div className="text-center py-8">Loading AI analysis...</div>
+            ) : advancedConflicts ? (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                  <div className="text-center p-3 bg-red-50 rounded-lg">
+                    <div className="text-2xl font-bold text-red-600">{advancedConflicts.summary?.critical || 0}</div>
+                    <div className="text-xs text-red-600">Critical</div>
+                  </div>
+                  <div className="text-center p-3 bg-orange-50 rounded-lg">
+                    <div className="text-2xl font-bold text-orange-600">{advancedConflicts.summary?.high || 0}</div>
+                    <div className="text-xs text-orange-600">High</div>
+                  </div>
+                  <div className="text-center p-3 bg-yellow-50 rounded-lg">
+                    <div className="text-2xl font-bold text-yellow-600">{advancedConflicts.summary?.medium || 0}</div>
+                    <div className="text-xs text-yellow-600">Medium</div>
+                  </div>
+                  <div className="text-center p-3 bg-green-50 rounded-lg">
+                    <div className="text-2xl font-bold text-green-600">{advancedConflicts.summary?.low || 0}</div>
+                    <div className="text-xs text-green-600">Low</div>
+                  </div>
+                  <div className="text-center p-3 bg-purple-50 rounded-lg">
+                    <div className="text-2xl font-bold text-purple-600">{advancedConflicts.optimization?.total_expected_delay_reduction || 0} min</div>
+                    <div className="text-xs text-purple-600">Delay Reduction</div>
+                  </div>
+                </div>
+                {advancedConflicts.conflicts?.length > 0 ? (
+                  <div className="space-y-2">
+                    <h4 className="font-medium">Detected Conflicts:</h4>
+                    {advancedConflicts.conflicts.map((conflict: any, idx: number) => (
+                      <div key={idx} className="p-3 border rounded-lg">
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium">{conflict.type} Conflict</span>
+                          <span className={`px-2 py-1 rounded text-xs ${conflict.severity === 'Critical' ? 'bg-red-100 text-red-800' : conflict.severity === 'High' ? 'bg-orange-100 text-orange-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                            {conflict.severity}
+                          </span>
+                        </div>
+                        <p className="text-sm text-muted-foreground mt-1">{conflict.description}</p>
+                        {conflict.resolution && (
+                          <p className="text-sm text-purple-600 mt-2">📋 {conflict.resolution.recommendation}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-4 text-green-600">
+                    ✓ No conflicts detected - System operating normally
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                Click "AI Conflict Analysis" to load analysis
+              </div>
+            )}
           </CardContent>
         </Card>
       )}

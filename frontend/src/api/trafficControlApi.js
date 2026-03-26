@@ -31,6 +31,12 @@ const trafficControlApi = {
     return response.data;
   },
 
+  // Get advanced conflict analysis with AI resolution
+  getAdvancedConflicts: async () => {
+    const response = await axiosInstance.get('/traffic/conflicts?mode=advanced');
+    return response.data;
+  },
+
   // Get comprehensive dashboard
   getDashboard: async () => {
     const response = await axiosInstance.get('/traffic/dashboard');
