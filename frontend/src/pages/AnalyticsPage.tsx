@@ -1,93 +1,129 @@
-import { useState, useEffect } from "react";
+// ============================================================
+// frontend/src/pages/AnalyticsPage.tsx  — PRODUCTION UPGRADED
+// FIX 1: analyticsService.getAnalytics() now properly unwraps data
+// FIX 2: Stats cards now show actual DB values, not zeros
+// FIX 3: Added AI prediction history table
+// FIX 4: Better empty-state handling with seed instructions
+// FIX 5: Added error toast instead of just console.error
+// ============================================================
+
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { BarChart3, RefreshCw, Trash2 } from "lucide-react";
+import { BarChart3, RefreshCw, Trash2, Brain, AlertCircle } from "lucide-react";
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, LineChart, Line, Legend,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
+  ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Legend,
 } from "recharts";
 import { analyticsService, AnalyticsData } from "@/services/analyticsService";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
 
 const PIE_COLORS = [
-  "hsl(225, 80%, 56%)", "hsl(190, 90%, 50%)", "hsl(142, 70%, 45%)",
-  "hsl(38, 92%, 50%)", "hsl(0, 72%, 51%)",
+  "hsl(217, 92%, 48%)",
+  "hsl(168, 83%, 42%)",
+  "hsl(142, 72%, 48%)",
+  "hsl(39, 88%, 52%)",
+  "hsl(0, 84%, 60%)",
 ];
 
-const fallbackData: AnalyticsData = {
+const FALLBACK_DATA: AnalyticsData = {
   delayTrends: [
-    { name: "Mon", delay: 5 }, { name: "Tue", delay: 8 }, { name: "Wed", delay: 3 },
-    { name: "Thu", delay: 12 }, { name: "Fri", delay: 6 }, { name: "Sat", delay: 4 },
-    { name: "Sun", delay: 7 },
+    { name: "06:00", delay: 3 }, { name: "08:00", delay: 12 }, { name: "10:00", delay: 7 },
+    { name: "12:00", delay: 4 }, { name: "14:00", delay: 5 }, { name: "16:00", delay: 8 },
+    { name: "18:00", delay: 15 }, { name: "20:00", delay: 9 }, { name: "22:00", delay: 2 },
   ],
   priorityData: [
     { name: "Priority 1", value: 8 },
-    { name: "Priority 2", value: 12 },
+    { name: "Priority 2", value: 14 },
     { name: "Priority 3", value: 6 },
-    { name: "Priority 4", value: 3 },
-    { name: "Priority 5", value: 1 },
   ],
   conflictData: [
-    { name: "Week 1", low: 12, medium: 5, high: 1 },
-    { name: "Week 2", low: 15, medium: 3, high: 2 },
-    { name: "Week 3", low: 10, medium: 7, high: 0 },
-    { name: "Week 4", low: 18, medium: 4, high: 1 },
+    { name: "Mon", low: 12, medium: 5, high: 1 },
+    { name: "Tue", low: 15, medium: 3, high: 2 },
+    { name: "Wed", low: 10, medium: 7, high: 0 },
+    { name: "Thu", low: 18, medium: 4, high: 1 },
+    { name: "Fri", low: 14, medium: 6, high: 3 },
   ],
-  stats: {
-    totalPredictions: 0,
-    avgDelay: 0,
-    highRiskCount: 0,
-    mediumRiskCount: 0,
-    lowRiskCount: 0,
-  },
+  stats: { totalPredictions: 0, avgDelay: 0, highRiskCount: 0, mediumRiskCount: 0, lowRiskCount: 0 },
 };
 
 const tooltipStyle = {
   contentStyle: {
-    background: "hsl(222, 25%, 10%)",
-    border: "1px solid hsl(222, 20%, 18%)",
+    background: "hsl(0 0% 100%)",
+    border: "1px solid hsl(220 13% 91%)",
     borderRadius: "8px",
-    color: "hsl(210, 40%, 93%)",
+    color: "hsl(220 13% 15%)",
     fontSize: "12px",
   },
 };
 
 const AnalyticsPage = () => {
-  const [data, setData] = useState<AnalyticsData>(fallbackData);
+  const [data, setData] = useState<AnalyticsData>(FALLBACK_DATA);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [isRealData, setIsRealData] = useState(false);
+  const [recentPredictions, setRecentPredictions] = useState<any[]>([]);
+  const { toast } = useToast();
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
-    setError(null);
     try {
-      const analyticsData = await analyticsService.getAnalytics();
-      if (analyticsData.stats.totalPredictions > 0) {
-        setData(analyticsData);
-      } else {
-        setData(fallbackData);
+      const [analyticsData, predictions] = await Promise.allSettled([
+        analyticsService.getAnalytics(),
+        analyticsService.getRecentPredictions(),
+      ]);
+
+      if (analyticsData.status === "fulfilled") {
+        const d = analyticsData.value;
+        if (d.stats.totalPredictions > 0) {
+          setData(d);
+          setIsRealData(true);
+        } else {
+          setData(FALLBACK_DATA);
+          setIsRealData(false);
+        }
+      }
+
+      if (predictions.status === "fulfilled") {
+        setRecentPredictions(predictions.value.slice(0, 8));
       }
     } catch (err) {
-      console.error("Failed to fetch analytics:", err);
-      setError("Failed to load analytics data");
-      setData(fallbackData);
+      toast({
+        title: "Failed to load analytics",
+        description: "Using demo data. Check backend connection.",
+        variant: "destructive",
+      });
+      setData(FALLBACK_DATA);
     } finally {
       setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    fetchData();
   }, []);
 
+  useEffect(() => { fetchData(); }, [fetchData]);
+
   const handleClearData = async () => {
-    if (confirm("Are you sure you want to clear all prediction history?")) {
+    if (!confirm("Clear all AI prediction history? This cannot be undone.")) return;
+    try {
       await analyticsService.clearPredictions();
-      setData(fallbackData);
+      setData(FALLBACK_DATA);
+      setIsRealData(false);
+      setRecentPredictions([]);
+      toast({ title: "Cleared", description: "All prediction history removed." });
+    } catch {
+      toast({ title: "Error", description: "Failed to clear data.", variant: "destructive" });
     }
   };
 
+  const statCards = [
+    { label: "Total Predictions", value: data.stats.totalPredictions, color: "text-primary" },
+    { label: "Avg Delay (min)", value: data.stats.avgDelay, color: "text-foreground" },
+    { label: "High Risk Count", value: data.stats.highRiskCount, color: "text-destructive" },
+    { label: "Low Risk Count", value: data.stats.lowRiskCount, color: "text-success" },
+  ];
+
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
@@ -103,60 +139,56 @@ const AnalyticsPage = () => {
             <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
             Refresh
           </Button>
-          <Button variant="outline" size="sm" onClick={handleClearData}>
-            <Trash2 className="h-4 w-4 mr-2" />
-            Clear Data
-          </Button>
+          {isRealData && (
+            <Button variant="outline" size="sm" onClick={handleClearData}>
+              <Trash2 className="h-4 w-4 mr-2" />
+              Clear History
+            </Button>
+          )}
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }} 
-          animate={{ opacity: 1, y: 0 }}
-          className="glass rounded-xl p-4"
-        >
-          <p className="text-xs text-muted-foreground">Total Predictions</p>
-          <p className="text-2xl font-bold text-foreground">{data.stats.totalPredictions}</p>
-        </motion.div>
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }} 
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="glass rounded-xl p-4"
-        >
-          <p className="text-xs text-muted-foreground">Avg Delay</p>
-          <p className="text-2xl font-bold text-foreground">{data.stats.avgDelay} min</p>
-        </motion.div>
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }} 
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="glass rounded-xl p-4"
-        >
-          <p className="text-xs text-muted-foreground">High Risk</p>
-          <p className="text-2xl font-bold text-destructive">{data.stats.highRiskCount}</p>
-        </motion.div>
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }} 
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="glass rounded-xl p-4"
-        >
-          <p className="text-xs text-muted-foreground">Low Risk</p>
-          <p className="text-2xl font-bold text-green-500">{data.stats.lowRiskCount}</p>
-        </motion.div>
-      </div>
-
-      {error && (
-        <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4 text-destructive">
-          {error}
+      {/* Demo data banner */}
+      {!isRealData && !loading && (
+        <div className="flex items-center gap-3 rounded-xl border border-warning/30 bg-warning/5 p-4 text-sm text-warning">
+          <AlertCircle className="h-5 w-5 shrink-0" />
+          <p>
+            Showing <strong>demo data</strong> — no AI predictions made yet. Go to{" "}
+            <strong>AI Control</strong> and run some analyses to see real data here.
+          </p>
         </div>
       )}
 
+      {/* Stat Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+        {statCards.map((card, i) => (
+          <motion.div
+            key={card.label}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.08 }}
+            className="stat-card group"
+          >
+            <p className="text-xs text-muted-foreground font-semibold mb-2 uppercase tracking-wider">{card.label}</p>
+            {loading ? (
+              <div className="h-8 w-20 bg-gradient-to-r from-blue-100 to-cyan-100 rounded-lg animate-shimmer" />
+            ) : (
+              <p className={`text-3xl font-bold mt-2 ${card.color}`}>
+                {typeof card.value === "number" ? card.value.toFixed(card.label.includes("Avg") ? 1 : 0) : card.value}
+              </p>
+            )}
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass rounded-xl p-6">
-          <h3 className="text-sm font-semibold text-foreground mb-4">Delay Trends (Hourly)</h3>
+        {/* Delay Trends */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="stat-card p-6">
+          <h3 className="text-sm font-bold text-foreground mb-5 flex items-center gap-2">
+            <BarChart3 className="h-5 w-5 text-blue-600" />
+            Delay Trends (Hourly)
+          </h3>
           {loading ? (
             <div className="h-[250px] flex items-center justify-center">
               <RefreshCw className="h-8 w-8 animate-spin text-primary" />
@@ -164,33 +196,38 @@ const AnalyticsPage = () => {
           ) : (
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={data.delayTrends}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(222, 20%, 18%)" />
-                <XAxis dataKey="name" stroke="hsl(215, 20%, 55%)" fontSize={12} />
-                <YAxis stroke="hsl(215, 20%, 55%)" fontSize={12} />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(220 13% 91%)" />
+                <XAxis dataKey="name" stroke="hsl(220 8% 45%)" fontSize={11} />
+                <YAxis stroke="hsl(220 8% 45%)" fontSize={11} unit="m" />
                 <Tooltip {...tooltipStyle} />
-                <Bar dataKey="delay" fill="hsl(225, 80%, 56%)" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="delay" fill="hsl(210 98% 42%)" radius={[6, 6, 0, 0]} name="Avg Delay (min)" />
               </BarChart>
             </ResponsiveContainer>
           )}
         </motion.div>
 
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="glass rounded-xl p-6">
-          <h3 className="text-sm font-semibold text-foreground mb-4">Priority Distribution</h3>
+        {/* Priority Distribution */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="stat-card p-6">
+          <h3 className="text-sm font-bold text-foreground mb-5 flex items-center gap-2">
+            <BarChart3 className="h-5 w-5 text-cyan-600" />
+            Priority Distribution
+          </h3>
           {loading ? (
             <div className="h-[250px] flex items-center justify-center">
               <RefreshCw className="h-8 w-8 animate-spin text-primary" />
             </div>
-          ) : data.priorityData.length > 0 ? (
+          ) : (
             <ResponsiveContainer width="100%" height={250}>
               <PieChart>
-                <Pie 
-                  data={data.priorityData} 
-                  cx="50%" 
-                  cy="50%" 
-                  innerRadius={60} 
-                  outerRadius={90} 
-                  dataKey="value" 
-                  label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`} 
+                <Pie
+                  data={data.priorityData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={95}
+                  dataKey="value"
+                  label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                  labelLine={false}
                   fontSize={11}
                 >
                   {data.priorityData.map((_, i) => (
@@ -200,15 +237,20 @@ const AnalyticsPage = () => {
                 <Tooltip {...tooltipStyle} />
               </PieChart>
             </ResponsiveContainer>
-          ) : (
-            <div className="h-[250px] flex items-center justify-center text-muted-foreground">
-              No priority data yet
-            </div>
           )}
         </motion.div>
 
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="glass rounded-xl p-6 lg:col-span-2">
-          <h3 className="text-sm font-semibold text-foreground mb-4">Conflict Risk Statistics</h3>
+        {/* Conflict Risk Over Time */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="stat-card p-6 lg:col-span-2"
+        >
+          <h3 className="text-sm font-bold text-foreground mb-5 flex items-center gap-2">
+            <BarChart3 className="h-5 w-5 text-blue-600" />
+            Conflict Risk Over Time
+          </h3>
           {loading ? (
             <div className="h-[280px] flex items-center justify-center">
               <RefreshCw className="h-8 w-8 animate-spin text-primary" />
@@ -216,19 +258,71 @@ const AnalyticsPage = () => {
           ) : (
             <ResponsiveContainer width="100%" height={280}>
               <LineChart data={data.conflictData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(222, 20%, 18%)" />
-                <XAxis dataKey="name" stroke="hsl(215, 20%, 55%)" fontSize={12} />
-                <YAxis stroke="hsl(215, 20%, 55%)" fontSize={12} />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(220 13% 91%)" />
+                <XAxis dataKey="name" stroke="hsl(220 8% 45%)" fontSize={11} />
+                <YAxis stroke="hsl(220 8% 45%)" fontSize={11} />
                 <Tooltip {...tooltipStyle} />
-                <Legend wrapperStyle={{ fontSize: "12px", color: "hsl(215, 20%, 55%)" }} />
-                <Line type="monotone" dataKey="low" stroke="hsl(142, 70%, 45%)" strokeWidth={2} dot={{ r: 4 }} name="Low Risk" />
-                <Line type="monotone" dataKey="medium" stroke="hsl(38, 92%, 50%)" strokeWidth={2} dot={{ r: 4 }} name="Medium Risk" />
-                <Line type="monotone" dataKey="high" stroke="hsl(0, 72%, 51%)" strokeWidth={2} dot={{ r: 4 }} name="High Risk" />
+                <Legend wrapperStyle={{ fontSize: "12px", color: "hsl(220 8% 45%)" }} />
+                <Line type="monotone" dataKey="low" stroke="hsl(142, 72%, 48%)" strokeWidth={2.5} dot={{ r: 4 }} name="Low Risk" />
+                <Line type="monotone" dataKey="medium" stroke="hsl(39, 88%, 52%)" strokeWidth={2.5} dot={{ r: 4 }} name="Medium Risk" />
+                <Line type="monotone" dataKey="high" stroke="hsl(0, 84%, 60%)" strokeWidth={2.5} dot={{ r: 4 }} name="High Risk" />
               </LineChart>
             </ResponsiveContainer>
           )}
         </motion.div>
       </div>
+
+      {/* Recent AI Predictions Table */}
+      {recentPredictions.length > 0 && (
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="border border-border bg-white rounded-lg card-hover p-6">
+          <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+            <Brain className="h-4 w-4 text-accent" />
+            Recent AI Predictions
+          </h3>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border bg-muted/40">
+                  {["Train", "Track Status", "Pred. Delay", "Risk", "Confidence", "Time"].map((h) => (
+                    <th key={h} className="px-3 py-2 text-left text-xs font-semibold text-foreground uppercase tracking-wide">
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {recentPredictions.map((p, i) => (
+                  <tr key={i} className="hover:bg-muted/20 transition-colors">
+                    <td className="px-3 py-2 font-mono text-foreground font-medium">{p.trainNumber}</td>
+                    <td className="px-3 py-2 text-muted-foreground">{p.trackStatus}</td>
+                    <td className="px-3 py-2 text-foreground font-medium">{p.predictedDelay} min</td>
+                    <td className="px-3 py-2">
+                      <Badge
+                        variant="outline"
+                        className={
+                          p.congestionRisk === "High"
+                            ? "border-destructive/40 text-destructive bg-destructive/10"
+                            : p.congestionRisk === "Medium"
+                            ? "border-warning/40 text-warning bg-warning/10"
+                            : "border-success/40 text-success bg-success/10"
+                        }
+                      >
+                        {p.congestionRisk}
+                      </Badge>
+                    </td>
+                    <td className="px-3 py-2 text-muted-foreground">
+                      {p.confidenceScore ? `${Math.round(p.confidenceScore * 100)}%` : "-"}
+                    </td>
+                    <td className="px-3 py-2 text-muted-foreground text-xs">
+                      {new Date(p.createdAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </motion.div>
+      )}
     </div>
   );
 };

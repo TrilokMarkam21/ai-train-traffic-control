@@ -75,28 +75,28 @@ const TrackingPage = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Map Area */}
-        <div className="lg:col-span-2 glass rounded-xl p-4 h-[500px] relative overflow-hidden">
+        <div className="lg:col-span-2 rounded-xl border border-border bg-white card-hover p-4 h-[500px] relative overflow-hidden">
           {loading ? (
             <div className="flex items-center justify-center h-full">
               <div className="text-center">
                 <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
-                <p className="text-muted-foreground mt-2">Loading trains...</p>
+                <p className="text-muted-foreground mt-2 font-medium">Loading trains...</p>
               </div>
             </div>
           ) : viewMode === "map" ? (
             <IndiaRailwayMap trains={mapTrains} />
           ) : (
             <div className="h-full overflow-auto">
-              <table className="w-full text-sm">
-                <thead className="sticky top-0 bg-slate-900">
-                  <tr>
-                    <th className="text-left p-3">Train No.</th>
-                    <th className="text-left p-3">Name</th>
-                    <th className="text-left p-3">Position</th>
-                    <th className="text-left p-3">Status</th>
+              <table className="w-full text-sm data-table">
+                <thead>
+                  <tr className="border-b border-border">
+                    <th className="text-left px-4 py-3 text-xs font-bold text-foreground uppercase">Train No.</th>
+                    <th className="text-left px-4 py-3 text-xs font-bold text-foreground uppercase">Name</th>
+                    <th className="text-left px-4 py-3 text-xs font-bold text-foreground uppercase">Position</th>
+                    <th className="text-left px-4 py-3 text-xs font-bold text-foreground uppercase">Status</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-border">
                   {trains.map((train, idx) => (
                     <motion.tr 
                       key={idx}
@@ -112,9 +112,9 @@ const TrackingPage = () => {
                       </td>
                       <td className="p-3">
                         <span className={`px-2 py-1 rounded text-xs ${
-                          (train.delay || 0) > 5 
-                            ? "bg-red-500/20 text-red-400" 
-                            : "bg-green-500/20 text-green-400"
+                          (train.delay || 0) > 5
+                            ? "bg-destructive/15 text-destructive border border-destructive/20"
+                            : "bg-success/15 text-success border border-success/20"
                         }`}>
                           {train.delay > 5 ? "Delayed" : "On Time"}
                         </span>
@@ -128,41 +128,43 @@ const TrackingPage = () => {
         </div>
 
         {/* Train List Sidebar */}
-        <div className="glass rounded-xl p-4 h-[500px] overflow-auto">
-          <h3 className="text-sm font-semibold text-foreground mb-4">Active Trains</h3>
-          <div className="space-y-3">
+        <div className="rounded-xl border border-border bg-white card-hover p-4 h-[500px] overflow-auto">
+          <h3 className="text-sm font-bold text-foreground mb-4">Active Trains ({trains.length})</h3>
+          <div className="space-y-2">
             {trains.map((train, idx) => (
               <motion.div
                 key={idx}
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: idx * 0.05 }}
-                className={`p-3 rounded-lg bg-secondary/30 border border-border cursor-pointer hover:bg-secondary/50 transition ${
-                  selectedTrain === train ? "ring-2 ring-primary" : ""
+                className={`p-3 rounded-lg border transition cursor-pointer fade-in-scale ${
+                  selectedTrain === train
+                    ? "bg-blue-50 border-blue-300/50 shadow-md"
+                    : "hover:bg-blue-50/40 border-border"
                 }`}
                 onClick={() => setSelectedTrain(train)}
               >
-                <div className="flex items-center gap-2 mb-2">
-                  <Train className="h-4 w-4 text-primary" />
-                  <span className="font-mono font-medium">{train.trainNumber || train.train_no}</span>
+                <div className="flex items-center gap-2 mb-1.5">
+                  <Train className="h-4 w-4 text-blue-600 shrink-0" />
+                  <span className="font-mono font-bold text-sm text-foreground">{train.trainNumber || train.train_no}</span>
                 </div>
-                <p className="text-sm text-muted-foreground mb-2">{train.trainName || train.train_name}</p>
+                <p className="text-xs text-muted-foreground mb-2 truncate">{train.trainName || train.train_name}</p>
                 <div className="flex items-center justify-between text-xs">
                   <div className="flex items-center gap-1 text-muted-foreground">
                     <MapPin className="h-3 w-3" />
-                    {train.latitude?.toFixed(2)}, {train.longitude?.toFixed(2)}
+                    <span className="truncate">{train.latitude?.toFixed(2)}, {train.longitude?.toFixed(2)}</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <Clock className="h-3 w-3 text-muted-foreground" />
-                    <span className={train.delay > 5 ? "text-red-400" : "text-green-400"}>
-                      {train.delay || 0} min
+                    <Clock className="h-3 w-3" />
+                    <span className={`font-bold ${train.delay > 5 ? "text-red-600" : "text-green-600"}`}>
+                      {train.delay || 0}m
                     </span>
                   </div>
                 </div>
               </motion.div>
             ))}
             {trains.length === 0 && !loading && (
-              <p className="text-center text-muted-foreground py-8">
+              <p className="text-center text-muted-foreground py-8 text-sm">
                 No trains available
               </p>
             )}
@@ -172,34 +174,34 @@ const TrackingPage = () => {
 
       {/* Selected Train Details */}
       {selectedTrain && (
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="glass rounded-xl p-6"
+          className="stat-card p-6"
         >
-          <h3 className="text-lg font-semibold text-foreground mb-4">
+          <h3 className="text-lg font-bold text-foreground mb-5">
             Train Details: {selectedTrain.trainNumber || selectedTrain.train_no}
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div>
-              <p className="text-xs text-muted-foreground">Train Name</p>
-              <p className="font-medium">{selectedTrain.trainName || selectedTrain.train_name}</p>
+            <div className="bg-gradient-to-br from-blue-50 to-cyan-50/40 rounded-lg p-4 border border-blue-100/50">
+              <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider mb-2">Train Name</p>
+              <p className="font-bold text-sm text-foreground">{selectedTrain.trainName || selectedTrain.train_name}</p>
             </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Current Delay</p>
-              <p className={`font-medium ${(selectedTrain.delay || 0) > 5 ? "text-red-400" : "text-green-400"}`}>
-                {selectedTrain.delay || 0} minutes
+            <div className="bg-gradient-to-br from-green-50 to-emerald-50/40 rounded-lg p-4 border border-green-100/50">
+              <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider mb-2">Current Delay</p>
+              <p className={`font-bold text-sm ${(selectedTrain.delay || 0) > 5 ? "text-red-600" : "text-green-600"}`}>
+                {selectedTrain.delay || 0} min
               </p>
             </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Position</p>
-              <p className="font-medium">
+            <div className="bg-gradient-to-br from-purple-50 to-pink-50/40 rounded-lg p-4 border border-purple-100/50">
+              <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider mb-2">Position</p>
+              <p className="font-mono text-xs text-foreground">
                 {selectedTrain.latitude?.toFixed(4)}, {selectedTrain.longitude?.toFixed(4)}
               </p>
             </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Speed</p>
-              <p className="font-medium">{selectedTrain.speed || 0} km/h</p>
+            <div className="bg-gradient-to-br from-orange-50 to-yellow-50/40 rounded-lg p-4 border border-orange-100/50">
+              <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider mb-2">Speed</p>
+              <p className="font-bold text-sm text-foreground">{selectedTrain.speedKmph?.toFixed(0) || 0} km/h</p>
             </div>
           </div>
         </motion.div>

@@ -28,7 +28,7 @@ class Settings(BaseSettings):
     model_path: str = "model/train_model.pkl"
     
     # CORS
-    cors_origins: list = ["*"]
+    cors_origins: list = ["http://localhost:5173", "http://localhost:3000"]
     
     # API
     api_prefix: str = "/v1"
@@ -61,7 +61,15 @@ class AppConfig:
         return not self.settings.debug
     
     def get_cors_origins(self) -> list:
-        """Get CORS origins."""
+        """Get CORS origins with safe production defaults."""
+        configured_origins = os.getenv("CORS_ORIGINS")
+        if configured_origins:
+            return [origin.strip() for origin in configured_origins.split(",") if origin.strip()]
+
+        # Only allow wildcard in debug mode; production must be explicit.
+        if self.settings.debug:
+            return ["*"]
+
         return self.settings.cors_origins
 
 

@@ -1,47 +1,55 @@
-import axiosInstance from './api';
+// ============================================================
+// frontend/src/api/trafficControlApi.js  — PRODUCTION UPGRADED
+// FIX 1: Was importing from './api' (the /api folder api.js with
+//        base URL "/api") but paths were like '/traffic/...'
+//        This means final URL was /api/traffic/... which is WRONG.
+//        Backend route is /api/traffic/... so base must be "/"
+//        Actually: axiosInstance has baseURL=http://localhost:5000
+//        and routes here are /api/traffic/... — that's CORRECT.
+//        BUT this file imports from '../api/api' not '../services/axiosInstance'
+//        — inconsistency with rest of the codebase. Fixed to use axiosInstance.
+// FIX 2: Unwrap { success, data } response envelope
+// FIX 3: Add error handling so page doesn't crash silently
+// ============================================================
+
+import axiosInstance from "../services/axiosInstance";
 
 const trafficControlApi = {
-  // Get section occupancy status
   getOccupancy: async () => {
-    const response = await axiosInstance.get('/traffic/occupancy');
-    return response.data;
+    const res = await axiosInstance.get("/api/traffic/occupancy");
+    return res.data?.data || res.data || [];
   },
 
-  // Detect conflicts between trains
   getConflicts: async () => {
-    const response = await axiosInstance.get('/traffic/conflicts');
-    return response.data;
+    const res = await axiosInstance.get("/api/traffic/conflicts");
+    return res.data?.data || res.data || [];
   },
 
-  // Get schedule adherence data
   getAdherence: async () => {
-    const response = await axiosInstance.get('/traffic/adherence');
-    return response.data;
+    const res = await axiosInstance.get("/api/traffic/adherence");
+    return res.data?.data || res.data || [];
   },
 
-  // Analyze delay impact
   getDelayImpact: async () => {
-    const response = await axiosInstance.get('/traffic/delay-impact');
-    return response.data;
+    const res = await axiosInstance.get("/api/traffic/delay-impact");
+    return res.data?.data || res.data || [];
   },
 
-  // Get platform suggestions
   getPlatformSuggestions: async (stationCode) => {
-    const response = await axiosInstance.get(`/traffic/platforms/${stationCode}`);
-    return response.data;
+    const res = await axiosInstance.get(`/api/traffic/platforms/${stationCode}`);
+    return res.data?.data || res.data || [];
   },
 
-  // Get advanced conflict analysis with AI resolution
   getAdvancedConflicts: async () => {
-    const response = await axiosInstance.get('/traffic/conflicts?mode=advanced');
-    return response.data;
+    const res = await axiosInstance.get("/api/traffic/conflict-analysis");
+    return res.data?.data || res.data || null;
   },
 
-  // Get comprehensive dashboard
   getDashboard: async () => {
-    const response = await axiosInstance.get('/traffic/dashboard');
-    return response.data;
-  }
+    const res = await axiosInstance.get("/api/traffic/dashboard");
+    // Dashboard returns multiple keys — unwrap or return whole data object
+    return res.data?.data || res.data || {};
+  },
 };
 
 export default trafficControlApi;

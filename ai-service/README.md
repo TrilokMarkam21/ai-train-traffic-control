@@ -79,7 +79,7 @@ ai-service/
 
 ## Prerequisites
 
-- Python 3.9+
+- Python 3.10 - 3.13 (Python 3.14 is not supported yet)
 - pip package manager
 - (Optional) Docker for containerized deployment
 
@@ -151,6 +151,12 @@ The model will be saved to `model/train_model.pkl`.
 ```bash
 # From ai-service directory
 uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+On Windows, prefer an explicit compatible interpreter:
+
+```bash
+py -3.13 -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
 ### Option 2: Run as Python Module

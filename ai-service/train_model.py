@@ -28,7 +28,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from app.logger import logger
 
 
-def generate_synthetic_data(n_samples: int = 10000) -> pd.DataFrame:
+def generate_synthetic_data(n_samples: int = 1000) -> pd.DataFrame:
     """
     Generate synthetic railway dataset with realistic patterns.
     
@@ -119,7 +119,7 @@ def train_model(df: pd.DataFrame) -> RandomForestRegressor:
     logger.info("Training RandomForestRegressor...")
     
     model = RandomForestRegressor(
-        n_estimators=100,
+        n_estimators=20,
         max_depth=15,
         min_samples_split=5,
         min_samples_leaf=2,

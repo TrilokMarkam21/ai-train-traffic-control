@@ -3,11 +3,15 @@ const router = express.Router();
 const trafficControlService = require("../services/trafficControlService");
 const smartTrafficService = require("../services/smartTrafficService");
 const conflictService = require("../services/conflictService");
+const { requireAuth } = require("../middleware/auth");
 
 /**
  * Traffic Control API Routes
  * Endpoints for real-time traffic management and throughput optimization
  */
+
+// Protect all traffic endpoints
+router.use(requireAuth);
 
 // Get section occupancy status
 router.get("/occupancy", async (req, res) => {

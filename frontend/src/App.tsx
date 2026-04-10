@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -17,42 +18,54 @@ import SchedulesPage from "@/pages/SchedulesPage";
 import TrafficControlPage from "@/pages/TrafficControlPage";
 import MaintenancePage from "@/pages/MaintenancePage";
 import NotFound from "@/pages/NotFound";
+import { discoverBackendUrl } from "@/services/backendDiscovery";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Navigate to="/login" replace />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route
-              element={
-                <ProtectedRoute>
-                  <DashboardLayout />
-                </ProtectedRoute>
-              }
-            >
-              <Route path="/dashboard" element={<DashboardPage />} />
-              <Route path="/trains" element={<TrainsPage />} />
-              <Route path="/tracking" element={<TrackingPage />} />
-              <Route path="/ai-control" element={<AIControlPage />} />
-              <Route path="/schedules" element={<SchedulesPage />} />
-              <Route path="/traffic-control" element={<TrafficControlPage />} />
-              <Route path="/maintenance" element={<MaintenancePage />} />
-              <Route path="/analytics" element={<AnalyticsPage />} />
-            </Route>
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  useEffect(() => {
+    // Auto-discover backend URL on app startup
+    discoverBackendUrl().catch((error) => {
+      console.error("❌ Backend discovery failed:", error);
+      console.log("🔄 Retrying backend discovery in 2 seconds...");
+      setTimeout(() => discoverBackendUrl().catch(() => {}), 2000);
+    });
+  }, []);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Navigate to="/login" replace />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout />
+                  </ProtectedRoute>
+                }
+              >
+                <Route path="/dashboard" element={<DashboardPage />} />
+                <Route path="/trains" element={<TrainsPage />} />
+                <Route path="/tracking" element={<TrackingPage />} />
+                <Route path="/ai-control" element={<AIControlPage />} />
+                <Route path="/schedules" element={<SchedulesPage />} />
+                <Route path="/traffic-control" element={<TrafficControlPage />} />
+                <Route path="/maintenance" element={<MaintenancePage />} />
+                <Route path="/analytics" element={<AnalyticsPage />} />
+              </Route>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;

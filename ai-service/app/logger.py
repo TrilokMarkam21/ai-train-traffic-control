@@ -14,28 +14,31 @@ from pathlib import Path
 def setup_logger(name: str = "ai-service") -> logging.Logger:
     """
     Configure and return a logger instance.
-    
+
     Args:
         name: Logger name (default: "ai-service")
-    
+
     Returns:
         Configured logger instance
     """
     logger = logging.getLogger(name)
-    
+
     # Avoid duplicate handlers
     if logger.handlers:
         return logger
-    
+
     logger.setLevel(logging.DEBUG)
-    
+
     # Create logs directory
     log_dir = Path("logs")
     log_dir.mkdir(exist_ok=True)
-    
+
     # Console handler with colored output
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setLevel(logging.INFO)
+    # Force UTF-8 encoding for Windows compatibility
+    if hasattr(console_handler, 'stream') and hasattr(console_handler.stream, 'reconfigure'):
+        console_handler.stream.reconfigure(encoding='utf-8')
     
     # File handler for persistent logs
     file_handler = logging.FileHandler(

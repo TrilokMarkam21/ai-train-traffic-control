@@ -74,18 +74,38 @@ const RegisterPage = () => {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-foreground/80">Full Name</Label>
-              <Input id="name" placeholder="John Doe" value={name} onChange={(e) => setName(e.target.value)} className="bg-secondary/50 border-border/50 focus:border-primary" />
+              <Label htmlFor="name" className="text-foreground font-semibold text-sm">Full Name</Label>
+              <Input
+                id="name"
+                placeholder="John Doe"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="bg-blue-50/50 border-blue-200 focus:border-primary focus:ring-1 focus:ring-primary rounded-lg h-11"
+              />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-foreground/80">Email</Label>
-              <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="bg-secondary/50 border-border/50 focus:border-primary" />
+              <Label htmlFor="email" className="text-foreground font-semibold text-sm">Email Address</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="bg-blue-50/50 border-blue-200 focus:border-primary focus:ring-1 focus:ring-primary rounded-lg h-11"
+              />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-foreground/80">Password</Label>
-              <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="bg-secondary/50 border-border/50 focus:border-primary" />
+              <Label htmlFor="password" className="text-foreground font-semibold text-sm">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="bg-blue-50/50 border-blue-200 focus:border-primary focus:ring-1 focus:ring-primary rounded-lg h-11"
+              />
             </div>
-            <Button type="submit" className="w-full mt-2" disabled={loading}>
+            <Button type="submit" className="w-full mt-4 h-11 font-semibold bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700" disabled={loading}>
               {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               {loading ? "Creating account..." : "Create Account"}
             </Button>
